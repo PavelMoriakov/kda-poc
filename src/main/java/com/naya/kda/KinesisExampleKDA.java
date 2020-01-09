@@ -1,7 +1,10 @@
 package com.naya.kda;
 
 import com.naya.avro.EventAttributes;
+import org.apache.flink.api.common.serialization.DeserializationSchema;
+import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
@@ -11,9 +14,11 @@ import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConsta
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Properties;
 
-public class KinesisExample {
+public class KinesisExampleKDA {
     private static final String REGION = "us-east-1";
 
     public static void main(String[] args) throws Exception {
@@ -25,13 +30,12 @@ public class KinesisExample {
         env.enableCheckpointing(50000);
 
         DataStream<EventAttributes> consumerStream = env.addSource(new FlinkKinesisConsumer<>(
-                "dev-pzn-events", new KinesisSerializer(), consumerConfig));
+                "dev-events", new KinesisSerializer(), consumerConfig));
 
         consumerStream
-                //.writeAsText("result.txt");
                 .addSink(getProducer());
 
-        env.execute("test-kda");
+        env.execute("kinesis-example");
 
     }
 
@@ -41,8 +45,35 @@ public class KinesisExample {
         outputProperties.setProperty("AggregationEnabled", "false");
 
         FlinkKinesisProducer<EventAttributes> sink = new FlinkKinesisProducer<>(new KinesisSerializer(), outputProperties);
-        sink.setDefaultStream("dev-pzn-behavior");
+        sink.setDefaultStream("dev-result");
         sink.setDefaultPartition("0");
         return sink;
+    }
+}
+
+class KinesisSerializer implements DeserializationSchema<EventAttributes>, SerializationSchema<EventAttributes> {
+    @Override
+    public EventAttributes deserialize(byte[] bytes) throws IOException {
+        return EventAttributes.fromByteBuffer(ByteBuffer.wrap(bytes));
+    }
+
+    @Override
+    public boolean isEndOfStream(EventAttributes eventAttributes) {
+        return false;
+    }
+
+    @Override
+    public byte[] serialize(EventAttributes eventAttributes) {
+        try {
+            return eventAttributes.toByteBuffer().array();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new byte[1];
+    }
+
+    @Override
+    public TypeInformation<EventAttributes> getProducedType() {
+        return TypeInformation.of(EventAttributes.class);
     }
 }

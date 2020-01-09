@@ -1,3 +1,4 @@
+/*
 package com.naya.kda;
 
 import com.naya.avro.EventAttributes;
@@ -34,3 +35,4 @@ public class KinesisSerializer implements DeserializationSchema<EventAttributes>
         return TypeInformation.of(EventAttributes.class);
     }
 }
+*/
