@@ -14,9 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Properties;
 
 public class KinesisExample {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(KinesisExample.class);
-
     private static final String REGION = "us-east-1";
 
     public static void main(String[] args) throws Exception {
@@ -28,7 +25,7 @@ public class KinesisExample {
         env.enableCheckpointing(50000);
 
         DataStream<EventAttributes> consumerStream = env.addSource(new FlinkKinesisConsumer<>(
-                "dev-pzn-events", new KinesisDeserializer(), consumerConfig));
+                "dev-pzn-events", new KinesisSerializer(), consumerConfig));
 
         consumerStream
                 //.writeAsText("result.txt");
