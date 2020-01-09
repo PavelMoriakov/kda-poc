@@ -25,27 +25,25 @@ public class KinesisExample {
         consumerConfig.put(ConsumerConfigConstants.STREAM_INITIAL_POSITION, "LATEST");
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.enableCheckpointing(500);
+        env.enableCheckpointing(50000);
 
-       /* DataStream<EventAttributes> consumerStream = env.addSource(new FlinkKinesisConsumer<>(
-                "dev-pzn-events", new KinesisDeserializer(), consumerConfig));*/
-        DataStream<String> consumerStream = env.addSource(new FlinkKinesisConsumer<>(
-                "dev-pzn-events", new SimpleStringSchema(), consumerConfig));
+        DataStream<EventAttributes> consumerStream = env.addSource(new FlinkKinesisConsumer<>(
+                "dev-pzn-events", new KinesisDeserializer(), consumerConfig));
 
-        consumerStream.addSink(getProducer());
+        consumerStream
+                //.writeAsText("result.txt");
+                .addSink(getProducer());
 
         env.execute("test-kda");
 
     }
 
-    //private static FlinkKinesisProducer<EventAttributes> getProducer(){
-    private static FlinkKinesisProducer<String> getProducer(){
+    private static FlinkKinesisProducer<EventAttributes> getProducer(){
         Properties outputProperties = new Properties();
         outputProperties.setProperty(ConsumerConfigConstants.AWS_REGION, REGION);
         outputProperties.setProperty("AggregationEnabled", "false");
 
-        //FlinkKinesisProducer<EventAttributes> sink = new FlinkKinesisProducer<>(new KinesisSerializer(), outputProperties);
-        FlinkKinesisProducer<String> sink = new FlinkKinesisProducer<>(new SimpleStringSchema(), outputProperties);
+        FlinkKinesisProducer<EventAttributes> sink = new FlinkKinesisProducer<>(new KinesisSerializer(), outputProperties);
         sink.setDefaultStream("dev-pzn-behavior");
         sink.setDefaultPartition("0");
         return sink;
