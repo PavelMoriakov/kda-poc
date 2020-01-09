@@ -1,72 +1,8 @@
 @version("0.1.0")
-@namespace("com.ibm.wrtp.ubx")
+@namespace("com.naya.avro")
 protocol UBXEventProtocol{
 
   record EventAttributes{
                 union{null, string} name=null;
-                union{null, string} value=null;
-                union{null, string} type=null;
-				union{null, boolean} isSync=null;
   }
-
-  record Event{
-                union{null, string} code=null;
-				union{null, string} timestamp=null;
-				union{null, string} namespace=null;
-                union{null, string} version=null;
-                union{null, array<EventAttributes>} eventAttributes;
-                union{null, string} tenant=null;
-				union{null, string} x1Id=null;
-                union{null, array<string>} visitorId=null;
-                union{null, array<string>} alternateX1Id=null;
-  }           
-
-  record BatchAttributes{
-                union{null, array<Event>} events=null;
-  }
-  
-  record IdentifierAttributes{
-                union{null, string} name=null;
-                union{null, string} value=null;
-				union{null, boolean} isOriginal=null;
-  }
-  
-  record Identifiers{
-                union{null, array<IdentifierAttributes>} identifierAttributes=null;
-  }
-  
-  record EventBatch {
-  				union{null, string} source=null;
-  				union{null, string} x1Id=null;
-                union{null, string} version=null;
-				union{null, string} provider=null;
-				union{null, string} channel=null;
-                union{null, Identifiers} identifiers=null;
-				union{null, BatchAttributes} batchAttributes;							
-  }
-  
-  record HeaderAttributes{
-                union{null, string} name=null;
-				union{null, string} value=null;
-  }            
-
-  record Headers {
-    union{null, array<HeaderAttributes>} attributes=null;
-  }                       
-
-  record UBXEvent{
-    Headers headers;
-    EventBatch eventbatch;
-  }
-
-  record KeyValueUBXEvent{
-     union{null, string} kinesisKey=null;
-     UBXEvent ubxEvent;
-  }
-
-  record KeyValueEvent{
-       union{null, string} kinesisKey=null;
-       Event Event;
-    }
-
 }
